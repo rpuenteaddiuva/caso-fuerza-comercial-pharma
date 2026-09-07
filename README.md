@@ -37,12 +37,16 @@ Python 3.12. Todo se ejecuta desde la raíz del repositorio en unos 30 segundos.
 
 ## Método en tres líneas
 
-1. **Diagnóstico:** reparto de visitas por segmento y distribución por médico (secciones 1 y 2).
+1. **Datos y diagnóstico:** auditoría de calidad de los cuatro ficheros con la decisión tomada
+   ante cada imperfección (sección 0.1), reparto de visitas por segmento y distribución por
+   médico (sección 1).
 2. **Respuesta a la visita:** curva de saturación `cuota = base + D·v/(v+h)` estimada sobre
    cambios dentro del mismo médico entre 2024 y 2025, validada contra el corte transversal, un
    panel mensual con efectos fijos y ajustes por segmento (sección 2).
 3. **Reasignación:** con la curva y el volumen de categoría de cada médico se reparten las
    visitas de cada delegado a quien más aporta (asignación greedy, óptima por concavidad), se
    valora en euros y se comprueba la robustez con bootstrap y curvas alternativas (secciones 3 a 6).
+4. **Distribuciones:** concentración del valor entre médicos, heterogeneidad de la respuesta,
+   el valor como distribución de 4.000 escenarios y potencia del piloto (sección 4.2).
 
 Supuestos y límites, en la sección 8 del notebook.

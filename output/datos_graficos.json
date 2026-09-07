@@ -440,5 +440,248 @@
     "mes t-4": 0.14,
     "mes t-5": 0.17,
     "mes t-6": 0.13
-  }
+  },
+  "07_concentracion": {
+    "tabla": {
+      "0.5": {
+        "medicos": 184,
+        "visitas_anadidas": 982
+      },
+      "0.8": {
+        "medicos": 539,
+        "visitas_anadidas": 1917
+      },
+      "0.9": {
+        "medicos": 729,
+        "visitas_anadidas": 2300
+      },
+      "1.0": {
+        "medicos": 1131,
+        "visitas_anadidas": 2734
+      }
+    },
+    "curva_pct_acumulado_cada_50_medicos": {
+      "50": 20.9,
+      "100": 34.4,
+      "150": 44.6,
+      "200": 52.2,
+      "250": 58.0,
+      "300": 62.9,
+      "350": 67.1,
+      "400": 70.8,
+      "450": 74.3,
+      "500": 77.6,
+      "550": 80.7,
+      "600": 83.6,
+      "650": 86.3,
+      "700": 88.8,
+      "750": 90.8,
+      "800": 92.6,
+      "850": 94.0,
+      "900": 95.3,
+      "950": 96.5,
+      "1000": 97.6,
+      "1050": 98.6,
+      "1100": 99.5
+    }
+  },
+  "07b_deciles_volumen": {
+    "1": {
+      "medicos": 200,
+      "vis_hoy": 1.5,
+      "vis_plan": 1.3,
+      "ventas_extra_eur": 49156.4
+    },
+    "2": {
+      "medicos": 200,
+      "vis_hoy": 1.4,
+      "vis_plan": 1.7,
+      "ventas_extra_eur": 108488.1
+    },
+    "3": {
+      "medicos": 201,
+      "vis_hoy": 1.4,
+      "vis_plan": 2.0,
+      "ventas_extra_eur": 178166.5
+    },
+    "4": {
+      "medicos": 199,
+      "vis_hoy": 1.4,
+      "vis_plan": 2.2,
+      "ventas_extra_eur": 218179.6
+    },
+    "5": {
+      "medicos": 200,
+      "vis_hoy": 1.9,
+      "vis_plan": 2.5,
+      "ventas_extra_eur": 249753.7
+    },
+    "6": {
+      "medicos": 200,
+      "vis_hoy": 3.9,
+      "vis_plan": 4.2,
+      "ventas_extra_eur": 282494.4
+    },
+    "7": {
+      "medicos": 200,
+      "vis_hoy": 4.3,
+      "vis_plan": 5.0,
+      "ventas_extra_eur": 387386.6
+    },
+    "8": {
+      "medicos": 200,
+      "vis_hoy": 4.2,
+      "vis_plan": 5.4,
+      "ventas_extra_eur": 487739.3
+    },
+    "9": {
+      "medicos": 200,
+      "vis_hoy": 8.2,
+      "vis_plan": 6.9,
+      "ventas_extra_eur": 359684.9
+    },
+    "10": {
+      "medicos": 200,
+      "vis_hoy": 13.2,
+      "vis_plan": 10.2,
+      "ventas_extra_eur": 120071.7
+    }
+  },
+  "08_heterogeneidad": {
+    "R² de la curva sobre los cambios de cuota 2024 → 2025": 0.901,
+    "Desviación típica del cambio de cuota (pp)": 2.574,
+    "Desviación típica del residuo (pp)": 0.808,
+    "Médicos con |Δvisitas| ≥ 3": 343.0,
+    "Respuesta individual / modelo, percentil 25": 0.337,
+    "Respuesta individual / modelo, mediana": 0.864,
+    "Respuesta individual / modelo, percentil 75": 1.188,
+    "% de esos médicos con respuesta de signo contrario": 14.869,
+    "Varianza del residuo explicada por el delegado (R²)": 0.031,
+    "Varianza del residuo explicada por la región (R²)": 0.003,
+    "Correlación del residuo con la antigüedad del delegado": 0.031
+  },
+  "09_montecarlo": {
+    "resumen": {
+      "p10": 1.521,
+      "mediana": 1.897,
+      "p90": 2.294,
+      "P(> 1,0 M€)": 1.0,
+      "P(> 1,5 M€)": 0.925,
+      "P(> 2,0 M€)": 0.4
+    },
+    "histograma": {
+      "1.36-1.41": 32,
+      "1.41-1.47": 145,
+      "1.47-1.52": 236,
+      "1.52-1.58": 258,
+      "1.58-1.64": 226,
+      "1.64-1.69": 233,
+      "1.69-1.75": 270,
+      "1.75-1.80": 226,
+      "1.80-1.86": 228,
+      "1.86-1.91": 217,
+      "1.91-1.97": 205,
+      "1.97-2.03": 232,
+      "2.03-2.08": 258,
+      "2.08-2.14": 222,
+      "2.14-2.19": 219,
+      "2.19-2.25": 227,
+      "2.25-2.31": 208,
+      "2.31-2.36": 209,
+      "2.36-2.42": 112,
+      "2.42-2.47": 37
+    },
+    "supuestos": "curva por bootstrap; parte causal U(0,6; 1,0); ejecución U(0,7; 1,0)"
+  },
+  "10_potencia_piloto": {
+    "C o B: de 0 a 2 visitas": {
+      "efecto_esperado_pp": 7.01,
+      "medicos_por_grupo_en_6_meses": 2
+    },
+    "B: de 4 a 5 visitas": {
+      "efecto_esperado_pp": 0.82,
+      "medicos_por_grupo_en_6_meses": 15
+    },
+    "A: de 14 a 9 visitas": {
+      "efecto_esperado_pp": -1.06,
+      "medicos_por_grupo_en_6_meses": 9
+    }
+  },
+  "auditoria_datos": [
+    {
+      "comprobación": "Valores nulos",
+      "resultado": "médicos 0, delegados 0, visitas 0, prescripciones 0",
+      "decisión": "Nada que imputar"
+    },
+    {
+      "comprobación": "Integridad referencial (id_medico, id_delegado)",
+      "resultado": "completa en las tres tablas",
+      "decisión": "Se usa tal cual"
+    },
+    {
+      "comprobación": "Visita hecha por el delegado asignado al médico",
+      "resultado": "100% de las visitas",
+      "decisión": "La cartera de cada delegado es id_delegado_asignado"
+    },
+    {
+      "comprobación": "id_visita repetido",
+      "resultado": "0 casos",
+      "decisión": "Ninguno"
+    },
+    {
+      "comprobación": "Mismo delegado, mismo médico, mismo día",
+      "resultado": "255 filas sobrantes (253 pares y 1 triple, ids no consecutivos)",
+      "decisión": "Se eliminan como doble registro; sensibilidad en 4.1"
+    },
+    {
+      "comprobación": "Rango de fechas de visita",
+      "resultado": "2024-01-01 a 2025-12-28",
+      "decisión": "Coincide con los 24 meses de prescripción"
+    },
+    {
+      "comprobación": "Visitas en sábado o domingo",
+      "resultado": "28% (reparto uniforme entre los 7 días)",
+      "decisión": "Fechas sin calendario real: no se analiza por día de la semana"
+    },
+    {
+      "comprobación": "Códigos de brick",
+      "resultado": "120 códigos pero 150 pares región-brick (NOR-xx se repite en Noreste y Noroeste)",
+      "decisión": "El brick no se usa; la unidad es el médico y su delegado"
+    },
+    {
+      "comprobación": "Delegados por brick",
+      "resultado": "de 3 a 10",
+      "decisión": "El brick no es un territorio de delegado"
+    },
+    {
+      "comprobación": "Médicos por delegado",
+      "resultado": "de 19 a 62",
+      "decisión": "Carteras muy desiguales; el plan respeta la de cada uno"
+    },
+    {
+      "comprobación": "Visitas por delegado y año",
+      "resultado": "media 169, de 68 a 341 (el briefing habla de 6-10 al día)",
+      "decisión": "La capacidad es el volumen observado, no el del briefing"
+    },
+    {
+      "comprobación": "Médicos sin ninguna visita en dos años",
+      "resultado": "344 de 2.000",
+      "decisión": "Se analizan como visitas = 0"
+    },
+    {
+      "comprobación": "Prescripción: producto ≤ categoría, sin ceros, 24 meses por médico, sin duplicados",
+      "resultado": "se cumple en las 48.000 filas",
+      "decisión": "Tabla limpia"
+    },
+    {
+      "comprobación": "Volumen de categoría 2024 frente a 2025 por médico",
+      "resultado": "correlación 0.998",
+      "decisión": "El potencial es estable: 2025 sirve de base para 2026"
+    },
+    {
+      "comprobación": "Segmento A/B/C",
+      "resultado": "un solo snapshot (Marketing lo revisa cada año)",
+      "decisión": "No se puede medir el cambio de segmento; se usa el volumen real"
+    }
+  ]
 }

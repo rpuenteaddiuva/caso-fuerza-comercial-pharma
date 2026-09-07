@@ -29,6 +29,12 @@
 # 5. **Valor:** **≈ +2,4 M€ al año** (+8 % de ventas, cuota global de 19,9 % a ~21,5 %) a
 #    coste cero. Las variantes del modelo dan entre 2,25 y 2,5 M€; si solo se materializara
 #    la mitad del efecto estimado, 1,2 M€. Solo con "nadie a cero" ya se ganan ~1,3 M€.
+# 6. **Por dónde empezar y cuánto fiarse del número.** La mitad de la ganancia está en menos
+#    de 200 médicos y unas 1.000 visitas (sección 4.2). Una sola curva explica el 90 % de los
+#    cambios de cuota entre médicos: no hay subgrupos que respondan distinto. Simulando que solo
+#    parte del efecto es causal y que el plan se ejecuta a medias, el valor mediano es ≈ 1,9 M€ y
+#    supera 1,5 M€ en el 93 % de los escenarios. Un piloto de seis meses en una región basta para
+#    comprobarlo con menos de 15 médicos por grupo.
 #
 # El detalle, el método y los límites están en las secciones siguientes. Las cifras
 # finales se guardan en `output/resumen_cifras.json` y el plan por delegado y por médico
@@ -37,11 +43,12 @@
 # %% [markdown]
 # ## 0. Preparación
 #
-# Decisiones de partida (ver también la sección 8, Límites y supuestos):
+# Decisiones de partida (la auditoría completa de los datos está en 0.1; ver también la
+# sección 8, Límites y supuestos):
 #
 # - **Duplicados.** `visitas.csv` tiene 255 filas con el mismo delegado, médico y fecha
 #   (253 pares y un triple, con `id_visita` distintos). Se tratan como doble registro del
-#   sistema y se eliminan. La sensibilidad a esta decisión se mide en la sección 5.
+#   sistema y se eliminan. La sensibilidad a esta decisión se mide en la sección 4.1.
 # - **Grano de análisis: médico-año.** La fuerza comercial decide frecuencias anuales y
 #   los efectos de la visita duran meses (sección 3.3), así que el año es la unidad natural.
 # - **Potencial = volumen real de categoría del médico** (`unidades_categoria`), no la
@@ -116,6 +123,53 @@ assert not pre.duplicated(["id_medico", "mes"]).any()
 # Cada visita la hace el delegado asignado al médico
 assert (vis_raw.merge(med, on="id_medico").eval("id_delegado == id_delegado_asignado")).all()
 
+# %% [markdown]
+# ### 0.1 Auditoría de calidad de datos
+#
+# El enunciado avisa de que los datos salen "tal cual" del sistema. Antes de limpiar nada se
+# mide qué imperfecciones hay y se decide qué hacer con cada una. Solo una (los duplicados)
+# cambia los números; las demás condicionan qué análisis tiene sentido hacer y cuáles no.
+
+# %%
+def auditoria():
+    filas = []
+
+    def add(comprobacion, resultado, decision):
+        filas.append({"comprobación": comprobacion, "resultado": resultado, "decisión": decision})
+
+    nulos = {n: int(t.isna().sum().sum()) for n, t in [("médicos", med), ("delegados", dele), ("visitas", vis_raw), ("prescripciones", pre)]}
+    add("Valores nulos", ", ".join(f"{k} {v}" for k, v in nulos.items()), "Nada que imputar")
+    add("Integridad referencial (id_medico, id_delegado)", "completa en las tres tablas", "Se usa tal cual")
+    misma = vis_raw.merge(med, on="id_medico").eval("id_delegado == id_delegado_asignado").mean()
+    add("Visita hecha por el delegado asignado al médico", f"{misma:.0%} de las visitas", "La cartera de cada delegado es id_delegado_asignado")
+    add("id_visita repetido", f"{int(vis_raw.id_visita.duplicated().sum())} casos", "Ninguno")
+    sobran = int(vis_raw.duplicated(["id_delegado", "id_medico", "fecha"]).sum())
+    add("Mismo delegado, mismo médico, mismo día", f"{sobran} filas sobrantes (253 pares y 1 triple, ids no consecutivos)", "Se eliminan como doble registro; sensibilidad en 4.1")
+    add("Rango de fechas de visita", f"{vis_raw.fecha.min().date()} a {vis_raw.fecha.max().date()}", "Coincide con los 24 meses de prescripción")
+    dias = vis_raw.fecha.dt.dayofweek.value_counts(normalize=True)
+    add("Visitas en sábado o domingo", f"{dias.get(5, 0) + dias.get(6, 0):.0%} (reparto uniforme entre los 7 días)", "Fechas sin calendario real: no se analiza por día de la semana")
+    pares = med[["region", "brick"]].drop_duplicates().shape[0]
+    add("Códigos de brick", f"{med.brick.nunique()} códigos pero {pares} pares región-brick (NOR-xx se repite en Noreste y Noroeste)", "El brick no se usa; la unidad es el médico y su delegado")
+    dpb = med.groupby(["region", "brick"]).id_delegado_asignado.nunique()
+    add("Delegados por brick", f"de {dpb.min()} a {dpb.max()}", "El brick no es un territorio de delegado")
+    cpd = med.id_delegado_asignado.value_counts()
+    add("Médicos por delegado", f"de {cpd.min()} a {cpd.max()}", "Carteras muy desiguales; el plan respeta la de cada uno")
+    vpd = vis_raw.groupby(["id_delegado", vis_raw.fecha.dt.year]).size()
+    add("Visitas por delegado y año", f"media {vpd.mean():.0f}, de {vpd.min()} a {vpd.max()} (el briefing habla de 6-10 al día)", "La capacidad es el volumen observado, no el del briefing")
+    nunca = int((~med.id_medico.isin(vis_raw.id_medico)).sum())
+    add("Médicos sin ninguna visita en dos años", f"{nunca} de 2.000", "Se analizan como visitas = 0")
+    add("Prescripción: producto ≤ categoría, sin ceros, 24 meses por médico, sin duplicados", "se cumple en las 48.000 filas", "Tabla limpia")
+    cat_y = pre.groupby(["id_medico", pre.mes.str[:4]]).unidades_categoria.sum().unstack()
+    add("Volumen de categoría 2024 frente a 2025 por médico", f"correlación {cat_y.iloc[:, 0].corr(cat_y.iloc[:, 1]):.3f}", "El potencial es estable: 2025 sirve de base para 2026")
+    add("Segmento A/B/C", "un solo snapshot (Marketing lo revisa cada año)", "No se puede medir el cambio de segmento; se usa el volumen real")
+    return pd.DataFrame(filas)
+
+
+auditoria_df = auditoria()
+with pd.option_context("display.max_colwidth", 110):
+    display(auditoria_df)
+
+# %%
 # Duplicados: mismo delegado, mismo médico, mismo día
 dup = vis_raw.duplicated(["id_delegado", "id_medico", "fecha"])
 print(f"Visitas registradas: {len(vis_raw):,} | duplicadas mismo día: {dup.sum()} | válidas: {(~dup).sum():,}")
@@ -511,11 +565,12 @@ guardar(fig, "06_frecuencia_hoy_vs_plan")
 # %%
 rng = np.random.default_rng(42)
 n = len(v24)
-boot = []
+boot, boot_params = [], []
 for _ in range(300):
     idx = rng.integers(0, n, n)
     Db, hb = ajustar_fd(v24[idx], v25[idx], dcuota[idx])
     boot.append(valor_plan(v_plan, Db, hb))
+    boot_params.append((Db, hb))
 ic_boot = np.percentile(boot, [2.5, 97.5])
 
 # Curva por segmento: cada médico se valora con la curva de su segmento
@@ -541,6 +596,121 @@ robustez = pd.DataFrame({
 })
 display(robustez.round(2))
 rango_prudente = (robustez["ventas_extra_M€"].min(), robustez["ventas_extra_M€"].max())
+
+# %% [markdown]
+# ### 4.2 Distribuciones: dónde está el valor, cuánto varía la respuesta y qué probabilidad tiene el número
+#
+# Las medias resumen; las distribuciones dicen por dónde empezar, si una sola curva basta y
+# cuánto vale el plan en un escenario malo. Cuatro miradas:
+#
+# a. **Concentración del valor** entre médicos: cuántos aportan la mitad de la ganancia.
+# b. **Heterogeneidad de la respuesta**: si la curva media esconde subgrupos que responden distinto.
+# c. **El valor como distribución**: 4.000 escenarios combinando la incertidumbre de la curva, la
+#    parte del efecto que es causal y la parte del plan que se ejecuta.
+# d. **Ruido mensual y potencia del piloto**: cuántos médicos y meses hacen falta para ver el efecto.
+
+# %%
+# a) Concentración del valor
+gan = pd.DataFrame({"eur": delta_eur, "dv": v_plan - v_act, "seg": seg})
+gan = gan[gan.eur > 0].sort_values("eur", ascending=False)
+gan["acum"] = gan.eur.cumsum() / gan.eur.sum()
+concentracion = pd.DataFrame(
+    [{"parte_ganancia_bruta": q, "medicos": int((gan.acum < q).sum()) + 1,
+      "visitas_anadidas": int(gan.dv.iloc[: int((gan.acum < q).sum()) + 1].sum())} for q in [0.5, 0.8, 0.9, 1.0]]
+).set_index("parte_ganancia_bruta")
+print(f"Ganancia bruta en los médicos que suben: {eur(gan.eur.sum())} (la pérdida en los que bajan es {eur(-perdida)})")
+display(concentracion)
+deciles = (pd.DataFrame({"vis_hoy": v_act, "vis_plan": v_plan, "eur": delta_eur, "decil_volumen": pd.qcut(cat, 10, labels=False) + 1})
+           .groupby("decil_volumen").agg(medicos=("eur", "size"), vis_hoy=("vis_hoy", "mean"), vis_plan=("vis_plan", "mean"), ventas_extra_eur=("eur", "sum")).round(1))
+display(deciles)
+
+fig, ax = plt.subplots(figsize=(7, 4.2))
+ax.plot(np.arange(1, len(gan) + 1), 100 * gan.acum, color=C_PLAN, lw=2)
+for q in [0.5, 0.8]:
+    n_q, v_q = concentracion.loc[q, "medicos"], concentracion.loc[q, "visitas_anadidas"]
+    ax.plot([n_q, n_q], [0, 100 * q], color=C_TINTA2, lw=0.8, ls=":"); ax.plot([0, n_q], [100 * q, 100 * q], color=C_TINTA2, lw=0.8, ls=":")
+    ax.text(n_q + 15, 100 * q - 9, f"{int(q * 100)} % de la ganancia con {n_q} médicos\n({v_q:,} visitas añadidas)".replace(",", "."), fontsize=9, color=C_TINTA2)
+ax.set_xlim(0, len(gan)); ax.set_ylim(0, 103)
+ax.set_xlabel("Médicos que reciben más visitas, ordenados de mayor a menor ganancia"); ax.set_ylabel("% de la ganancia bruta acumulada")
+ax.set_title("El valor está concentrado: la mitad sale de menos de 200 médicos")
+guardar(fig, "07_concentracion_valor")
+
+# %%
+# b) Heterogeneidad de la respuesta
+pred_fd = g(v25, D, h) - g(v24, D, h)
+resid = dcuota - pred_fd
+r2_fd = float(1 - resid.var() / dcuota.var())
+grandes = np.abs(dvis) >= 3
+ratio = (dcuota[grandes] / dvis[grandes]) / (pred_fd[grandes] / dvis[grandes])
+info = med.set_index("id_medico").loc[W.index]
+resid_df = pd.DataFrame({"resid": resid, "region": info.region.values, "delegado": info.id_delegado_asignado.values}).merge(dele.drop(columns="region"), left_on="delegado", right_on="id_delegado")
+r2_deleg = sm.OLS(resid_df.resid, pd.get_dummies(resid_df.delegado, drop_first=True, dtype=float).assign(const=1.0)).fit().rsquared
+r2_region = sm.OLS(resid_df.resid, pd.get_dummies(resid_df.region, drop_first=True, dtype=float).assign(const=1.0)).fit().rsquared
+heterogeneidad = pd.Series({
+    "R² de la curva sobre los cambios de cuota 2024 → 2025": r2_fd,
+    "Desviación típica del cambio de cuota (pp)": 100 * dcuota.std(),
+    "Desviación típica del residuo (pp)": 100 * resid.std(),
+    "Médicos con |Δvisitas| ≥ 3": float(grandes.sum()),
+    "Respuesta individual / modelo, percentil 25": float(np.percentile(ratio, 25)),
+    "Respuesta individual / modelo, mediana": float(np.median(ratio)),
+    "Respuesta individual / modelo, percentil 75": float(np.percentile(ratio, 75)),
+    "% de esos médicos con respuesta de signo contrario": 100 * float((ratio < 0).mean()),
+    "Varianza del residuo explicada por el delegado (R²)": float(r2_deleg),
+    "Varianza del residuo explicada por la región (R²)": float(r2_region),
+    "Correlación del residuo con la antigüedad del delegado": float(resid_df.resid.corr(resid_df.antiguedad_anos)),
+})
+display(heterogeneidad.round(3).to_frame("valor"))
+
+fig, ax = plt.subplots(figsize=(6.2, 5))
+ax.scatter(100 * pred_fd, 100 * dcuota, s=8, alpha=0.35, color=C_PLAN, edgecolor="none")
+lim = [100 * min(pred_fd.min(), dcuota.min()) - 1, 100 * max(pred_fd.max(), dcuota.max()) + 1]
+ax.plot(lim, lim, color=C_TINTA, lw=1, ls="--"); ax.set_xlim(lim); ax.set_ylim(lim)
+ax.set_xlabel("Cambio de cuota que predice la curva (pp)"); ax.set_ylabel("Cambio de cuota observado 2024 → 2025 (pp)")
+ax.set_title(f"Una sola curva explica el {100 * r2_fd:.0f} % de los cambios de cuota de los 2.000 médicos")
+ax.grid(True, axis="both")
+guardar(fig, "08_heterogeneidad_respuesta")
+
+# %%
+# c) El valor como distribución
+rng_mc = np.random.default_rng(7)
+N_MC = 4000
+idx_b = rng_mc.integers(0, len(boot_params), N_MC)
+f_causal = rng_mc.uniform(0.6, 1.0, N_MC)  # supuesto: entre el 60 % y el 100 % del efecto estimado es causal
+f_ejec = rng_mc.uniform(0.7, 1.0, N_MC)  # supuesto: se ejecuta entre el 70 % y el 100 % de los cambios de frecuencia
+mc = np.empty(N_MC)
+for i in range(N_MC):
+    Db, hb = boot_params[idx_b[i]]
+    v_ej = v_act + f_ejec[i] * (v_plan - v_act)
+    mc[i] = float((cat * (g(v_ej, Db * f_causal[i], hb) - g(v_act, Db * f_causal[i], hb))).sum() * PRECIO) / 1e6
+montecarlo = pd.Series({"p10": np.percentile(mc, 10), "mediana": np.median(mc), "p90": np.percentile(mc, 90),
+                        "P(> 1,0 M€)": (mc > 1).mean(), "P(> 1,5 M€)": (mc > 1.5).mean(), "P(> 2,0 M€)": (mc > 2).mean()})
+display(montecarlo.round(2).to_frame("M€ o probabilidad"))
+
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.hist(mc, bins=40, color=C_PLAN, alpha=0.85, edgecolor="white", linewidth=0.5)
+top = ax.get_ylim()[1]
+for k, ls in [("p10", ":"), ("mediana", "-"), ("p90", ":")]:
+    ax.axvline(montecarlo[k], color=C_TINTA, lw=1.2, ls=ls)
+    ax.text(montecarlo[k] - 0.01, top * 0.97, f"{k} {montecarlo[k]:.2f}", rotation=90, va="top", ha="right", fontsize=8.5, color=C_TINTA)
+ax.axvline(valor_base / 1e6, color=C_ACENTO, lw=1.2)
+ax.text(valor_base / 1e6 - 0.01, top * 0.97, f"estimación central {valor_base / 1e6:.2f}", rotation=90, va="top", ha="right", fontsize=8.5, color=C_ACENTO)
+ax.set_xlabel("Ventas adicionales el primer año (M€)"); ax.set_ylabel("Escenarios simulados")
+ax.set_title("El valor como distribución: 4.000 escenarios de curva, selección y ejecución")
+guardar(fig, "09_distribucion_valor")
+
+# %%
+# d) Ruido mensual y potencia del piloto
+cuota_mes = pre.unidades_producto / pre.unidades_categoria
+ruido = cuota_mes - cuota_mes.groupby(pre.id_medico).transform("mean")
+sigma_mes = float(ruido.std())
+sigma_6m = sigma_mes / np.sqrt(6)  # media de seis meses por médico
+efectos = {"C o B: de 0 a 2 visitas": g(2, D, h) - g(0, D, h), "B: de 4 a 5 visitas": g(5, D, h) - g(4, D, h), "A: de 14 a 9 visitas": g(9, D, h) - g(14, D, h)}
+potencia = pd.DataFrame(
+    [{"cambio": k, "efecto_esperado_pp": 100 * e, "medicos_por_grupo_en_6_meses": max(2, int(np.ceil(2 * (1.96 + 0.84) ** 2 * sigma_6m ** 2 / e ** 2)))} for k, e in efectos.items()]
+).set_index("cambio")
+print(f"Desviación típica mensual de la cuota dentro del médico: {100 * sigma_mes:.1f} pp "
+      f"(test de dos grupos, medias de 6 meses, 5 % de significación y 80 % de potencia)")
+display(potencia.round(2))
 
 # %% [markdown]
 # ## 5. El plan, médico a médico y delegado a delegado
@@ -593,6 +763,8 @@ movidas = int(plan_med.delta_visitas.clip(lower=0).sum())
 print(f"Médicos que suben: {suben} (de ellos {de_cero} pasan de 0 a alguna visita) | bajan: {bajan} | "
       f"visitas que cambian de médico: {movidas:,} de {presupuesto_25:,} ({movidas / presupuesto_25:.0%})")
 print("Ningún delegado cambia su carga:", (plan_del.visitas == v_act.groupby(base.id_delegado_asignado).sum()).all())
+print(f"Fase 1 posible: los {concentracion.loc[0.5, 'medicos']} médicos con mayor ganancia y {concentracion.loc[0.5, 'visitas_anadidas']:,} visitas añadidas "
+      f"capturan la mitad de la ganancia bruta ({eur(gan.eur.sum() / 2)}).".replace(",", "."))
 
 # %% [markdown]
 # ## 6. Extensión: ¿y si cambia la premisa?
@@ -655,6 +827,13 @@ resumen = {
     "medicos_suben": suben, "medicos_bajan": bajan, "medicos_de_cero_a_visitados": de_cero,
     "visitas_que_cambian_de_medico": movidas,
     "valor_visita_extra_en_optimo_eur": round((valor_plan(v_mas) - valor_plan(v_global)) / 500),
+    "concentracion_valor": {f"medicos_{int(q * 100)}pct": int(concentracion.loc[q, "medicos"]) for q in [0.5, 0.8, 0.9]}
+    | {f"visitas_{int(q * 100)}pct": int(concentracion.loc[q, "visitas_anadidas"]) for q in [0.5, 0.8, 0.9]},
+    "r2_curva_sobre_cambios": round(r2_fd, 3),
+    "respuesta_individual_vs_modelo_p25_mediana_p75": [round(float(np.percentile(ratio, 25)), 2), round(float(np.median(ratio)), 2), round(float(np.percentile(ratio, 75)), 2)],
+    "montecarlo_M€": {k: round(float(v), 2) for k, v in montecarlo.items()},
+    "sigma_mensual_cuota_pp": round(100 * sigma_mes, 2),
+    "piloto_medicos_por_grupo_6_meses": potencia.medicos_por_grupo_en_6_meses.to_dict(),
 }
 (OUT / "resumen_cifras.json").write_text(json.dumps(resumen, indent=2, ensure_ascii=False), encoding="utf-8")
 print(json.dumps(resumen, indent=2, ensure_ascii=False))
@@ -679,6 +858,13 @@ datos_graficos = {
     "sensibilidad_capacidad": sens_capacidad.round(2).to_dict("index"),
     "plan_por_region_eur": plan_reg.to_dict("index"),
     "efecto_mensual_pp": efecto_mensual.pp_cuota.to_dict(),
+    "07_concentracion": {"tabla": concentracion.to_dict("index"), "curva_pct_acumulado_cada_50_medicos": {int(i): round(100 * float(gan.acum.iloc[i - 1]), 1) for i in range(50, len(gan) + 1, 50)}},
+    "07b_deciles_volumen": deciles.to_dict("index"),
+    "08_heterogeneidad": {k: round(float(v), 3) for k, v in heterogeneidad.items()},
+    "09_montecarlo": {"resumen": {k: round(float(v), 3) for k, v in montecarlo.items()}, "histograma": {f"{a:.2f}-{b:.2f}": int(c) for c, a, b in zip(*np.histogram(mc, bins=20), np.histogram(mc, bins=20)[1][1:])},
+                      "supuestos": "curva por bootstrap; parte causal U(0,6; 1,0); ejecución U(0,7; 1,0)"},
+    "10_potencia_piloto": potencia.round(2).to_dict("index"),
+    "auditoria_datos": auditoria_df.to_dict("records"),
 }
 (OUT / "datos_graficos.json").write_text(json.dumps(datos_graficos, indent=2, ensure_ascii=False), encoding="utf-8")
 
@@ -693,7 +879,12 @@ datos_graficos = {
 #   visita, así que el sesgo existe y es moderado; por eso se da un rango y no un solo número.
 # - **Misma curva para todos.** Se asume que la ganancia de cuota por visita depende del número
 #   de visitas y no del segmento; los ajustes por segmento son muy parecidos (tabla 2.4) y la
-#   valoración con curvas separadas cambia el valor en menos de 0,3 M€.
+#   valoración con curvas separadas cambia el valor en menos de 0,3 M€. La curva explica el 90 %
+#   de los cambios de cuota y el residuo no se relaciona con región, delegado ni antigüedad
+#   (sección 4.2): la media no esconde subgrupos.
+# - **Escenarios de la sección 4.2.** Los rangos de "parte causal" (60 a 100 %) y "ejecución"
+#   (70 a 100 %) son supuestos de juicio, no estimaciones; sirven para dar una distribución
+#   prudente del valor, no para sustituir la estimación central.
 # - **Potencial estable.** El volumen de categoría de cada médico cambia poco entre años
 #   (correlación 0,998), así que 2025 sirve como base para 2026.
 # - **Efecto simétrico.** Se asume que quitar visitas a un A le baja la cuota tanto como

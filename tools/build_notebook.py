@@ -4,12 +4,14 @@ Uso, desde la raíz del repositorio:  python tools/build_notebook.py
 """
 
 import asyncio
+import os
 import re
 import sys
 from pathlib import Path
 
 if sys.platform == "win32":  # evita que el cliente del kernel se quede colgado al cerrar en Windows
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+os.environ.pop("MPLBACKEND", None)  # el kernel debe usar el backend inline para incrustar los gráficos
 
 import nbformat  # noqa: E402
 from nbconvert.preprocessors import ExecutePreprocessor  # noqa: E402
@@ -35,4 +37,7 @@ kernel = sys.argv[1] if len(sys.argv) > 1 else "python3"
 ExecutePreprocessor(timeout=1800, kernel_name=kernel).preprocess(nb, {"metadata": {"path": str(ROOT)}})
 nb.metadata["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}
 nbformat.write(nb, ROOT / "analisis.ipynb")
-print(f"analisis.ipynb: {len(cells)} celdas ejecutadas con el kernel '{kernel}'")
+imagenes = sum(1 for c in nb.cells if c.cell_type == "code" for o in c.outputs if o.output_type == "display_data" and "image/png" in o.get("data", {}))
+print(f"analisis.ipynb: {len(cells)} celdas ejecutadas con el kernel '{kernel}', {imagenes} gráficos incrustados")
+if imagenes == 0:
+    sys.exit("Ningún gráfico incrustado: el kernel no usó el backend inline")

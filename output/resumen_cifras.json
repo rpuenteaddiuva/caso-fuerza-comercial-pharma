@@ -83,5 +83,33 @@
   "medicos_bajan": 595,
   "medicos_de_cero_a_visitados": 507,
   "visitas_que_cambian_de_medico": 2734,
-  "valor_visita_extra_en_optimo_eur": 577
+  "valor_visita_extra_en_optimo_eur": 577,
+  "concentracion_valor": {
+    "medicos_50pct": 184,
+    "medicos_80pct": 539,
+    "medicos_90pct": 729,
+    "visitas_50pct": 982,
+    "visitas_80pct": 1917,
+    "visitas_90pct": 2300
+  },
+  "r2_curva_sobre_cambios": 0.901,
+  "respuesta_individual_vs_modelo_p25_mediana_p75": [
+    0.34,
+    0.86,
+    1.19
+  ],
+  "montecarlo_M€": {
+    "p10": 1.52,
+    "mediana": 1.9,
+    "p90": 2.29,
+    "P(> 1,0 M€)": 1.0,
+    "P(> 1,5 M€)": 0.93,
+    "P(> 2,0 M€)": 0.4
+  },
+  "sigma_mensual_cuota_pp": 1.95,
+  "piloto_medicos_por_grupo_6_meses": {
+    "C o B: de 0 a 2 visitas": 2,
+    "B: de 4 a 5 visitas": 15,
+    "A: de 14 a 9 visitas": 9
+  }
 }

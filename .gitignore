@@ -1,0 +1,16 @@
+# Notas de trabajo locales
+CLAUDE.md
+prompt_claude_design.md
+
+# El zip original es redundante con 2_datos/
+2_datos.zip
+
+# Python / Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Temporales de Office
+~$*

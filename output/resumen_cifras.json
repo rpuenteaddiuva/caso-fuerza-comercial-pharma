@@ -1,0 +1,87 @@
+{
+  "ventas_2025_eur": 30605130,
+  "cuota_global_2025": 0.1992,
+  "visitas_2025_validas": 8278,
+  "visitas_duplicadas_eliminadas": 255,
+  "pct_visitas_decima_o_posterior": 0.225,
+  "medicos_ano_sin_visitas": 1006,
+  "medicos_sin_visitas_2025": 509,
+  "mal_segmentados": 30,
+  "visitas_por_medico_hoy": {
+    "A": 13.3,
+    "B": 4.1,
+    "C": 1.5
+  },
+  "visitas_por_medico_plan": {
+    "A": 9.6,
+    "B": 5.0,
+    "C": 1.9
+  },
+  "regla_sencilla": {
+    "A": 9,
+    "B": 5,
+    "C": 2
+  },
+  "curva": {
+    "D": 0.159,
+    "h": 2.536,
+    "cuota_base": 0.1172,
+    "techo": 0.2762
+  },
+  "cuota_0_visitas": 0.1238,
+  "cuota_3_5_visitas": 0.2104,
+  "cuota_10_mas_visitas": 0.2352,
+  "pp_por_visita_desde_0": 3.65,
+  "pp_por_visita_desde_10_14": 0.14,
+  "pp_por_visita_desde_20": 0.05,
+  "eur_visita_k_mediano": {
+    "A": {
+      "1": 9881,
+      "2": 5524,
+      "5": 1799,
+      "10": 613,
+      "14": 345,
+      "20": 183
+    },
+    "B": {
+      "1": 3833,
+      "2": 2143,
+      "5": 698,
+      "10": 238,
+      "14": 134,
+      "20": 71
+    },
+    "C": {
+      "1": 1332,
+      "2": 745,
+      "5": 243,
+      "10": 83,
+      "14": 46,
+      "20": 25
+    }
+  },
+  "valor_plan_eur": 2441121,
+  "valor_plan_pct_ventas": 0.08,
+  "valor_por_segmento_eur": {
+    "A": 47117,
+    "B": 1595738,
+    "C": 798267
+  },
+  "cuota_global_plan": 0.2151,
+  "valor_optimo_global_eur": 2498295,
+  "valor_regla_sencilla_eur": 2379641,
+  "valor_nadie_a_cero_eur": 1305165,
+  "rango_robustez_M€": [
+    1.22,
+    2.49
+  ],
+  "bootstrap_ic95_M€": [
+    2.39,
+    2.49
+  ],
+  "medicos_suben": 1130,
+  "medicos_bajan": 595,
+  "medicos_de_cero_a_visitados": 507,
+  "visitas_que_cambian_de_medico": 2734,
+  "valor_visita_extra_en_optimo_eur": 577
+}

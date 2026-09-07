@@ -692,8 +692,8 @@ top = ax.get_ylim()[1]
 for k, ls in [("p10", ":"), ("mediana", "-"), ("p90", ":")]:
     ax.axvline(montecarlo[k], color=C_TINTA, lw=1.2, ls=ls)
     ax.text(montecarlo[k] - 0.01, top * 0.97, f"{k} {montecarlo[k]:.2f}", rotation=90, va="top", ha="right", fontsize=8.5, color=C_TINTA)
-ax.axvline(valor_base / 1e6, color=C_ACENTO, lw=1.2)
-ax.text(valor_base / 1e6 - 0.01, top * 0.97, f"estimación central {valor_base / 1e6:.2f}", rotation=90, va="top", ha="right", fontsize=8.5, color=C_ACENTO)
+ax.axvline(valor_base / 1e6, color=C_TINTA, lw=1.2, ls="--")
+ax.text(valor_base / 1e6 - 0.01, top * 0.97, f"estimación central {valor_base / 1e6:.2f}", rotation=90, va="top", ha="right", fontsize=8.5, color=C_TINTA)
 ax.set_xlabel("Ventas adicionales el primer año (M€)"); ax.set_ylabel("Escenarios simulados")
 ax.set_title("El valor como distribución: 4.000 escenarios de curva, selección y ejecución")
 guardar(fig, "09_distribucion_valor")

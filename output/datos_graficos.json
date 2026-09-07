@@ -289,13 +289,13 @@
   "05_puente_M€": {
     "perdida_en_medicos_que_bajan": -0.92,
     "n_medicos_bajan": 595,
-    "ganancia_A": 0.53,
-    "ganancia_B": 1.86,
-    "ganancia_C": 0.98,
+    "ganancia_A": 0.528,
+    "ganancia_B": 1.858,
+    "ganancia_C": 0.975,
     "n_medicos_suben_A": 73,
     "n_medicos_suben_B": 455,
     "n_medicos_suben_C": 602,
-    "neto": 2.44
+    "neto": 2.441
   },
   "06_frecuencia_hoy_vs_plan": {
     "A": {

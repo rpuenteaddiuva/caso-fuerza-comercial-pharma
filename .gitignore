@@ -5,6 +5,9 @@ prompt_claude_design.md
 # El zip original es redundante con 2_datos/
 2_datos.zip
 
+# Fuentes de la presentación en Claude Design (el canvas publicado es el entregable)
+entregables/presentacion/
+
 # Python / Jupyter
 __pycache__/
 *.pyc

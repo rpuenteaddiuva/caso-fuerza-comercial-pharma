@@ -24,6 +24,7 @@ se ganan **≈ 2,4 M€ de ventas al año (+8 %)** a coste cero.
 | `2_datos/` | Los cuatro CSV del caso, sin modificar |
 | `3_enunciado.docx` | Enunciado del caso y diccionario de datos |
 | `output/` | Gráficos (`*.png`), plan de visitas por delegado y por médico (`plan_visitas_2026.xlsx`) y cifras finales (`resumen_cifras.json`) |
+| `entregables/` | Presentación (`.pptx`), notas del orador, guía del notebook, documento de metodología y `simulador_plan_visitas.html`, un simulador del plan que se abre en el navegador sin instalar nada |
 
 ## Cómo ejecutarlo
 

@@ -9,8 +9,9 @@
 #
 # ## Resumen ejecutivo
 #
-# 1. **La regla actual se cumple a rajatabla:** los A reciben ~13 visitas al año, los B ~4 y
-#    los C ~1,5. La segmentación es buena (solo 30 de 2.000 médicos están en el segmento
+# 1. **La regla actual se cumple a rajatabla:** de media, cada médico A recibe ~13 visitas al
+#    año; cada B, ~4; cada C, ~1,5 (son medias por médico: dentro de los A hay desde 0 hasta 29).
+#    La segmentación es buena (solo 30 de 2.000 médicos están en el segmento
 #    "equivocado" según su volumen real de categoría). El problema no es a quién se etiqueta
 #    como A, sino **cuántas veces se le visita**.
 # 2. **La cuota responde a la visita, pero se satura.** Un médico sin visitas tiene ~12 % de
@@ -23,8 +24,8 @@
 #    médicos-año (sobre todo B y C) no reciben ninguna. La décima visita a un A vale
 #    ~600 €; la quinta a un B, ~700 €; la segunda a un C, ~700 €. La primera visita a un B
 #    sin visitar vale más de 3.000 €.
-# 4. **Recomendación:** pasar de 13 / 4 / 1,5 visitas al año a **≈ 9-10 / 5 / 2 (A / B / C)**,
-#    ajustando por volumen de categoría de cada médico, dentro de la cartera de cada
+# 4. **Recomendación:** pasar de una media de 13 / 4 / 1,5 visitas al año por médico A / B / C a
+#    **≈ 9-10 / 5 / 2**, ajustando por volumen de categoría de cada médico, dentro de la cartera de cada
 #    delegado y sin mover una sola visita de un delegado a otro.
 # 5. **Valor:** **≈ +2,4 M€ al año** (+8 % de ventas, cuota global de 19,9 % a ~21,5 %) a
 #    coste cero. Las variantes del modelo dan entre 2,25 y 2,5 M€; si solo se materializara

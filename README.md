@@ -7,11 +7,11 @@ cuánto vale el cambio, con la misma plantilla?
 
 ## Tesis
 
-La regla actual (A ≈ 13 visitas al año, B ≈ 4, C ≈ 1,5) sigue bien el potencial, pero la
+La regla actual (de media, cada médico A recibe unas 13 visitas al año; cada B, 4; cada C, 1,5) sigue bien el potencial, pero la
 respuesta del médico a la visita **se satura a partir de 8-10 visitas al año**, y la curva es
 la misma para A, B y C. Hoy el 22,5 % de las visitas son la décima o posterior al mismo médico
 mientras 1.000 médicos-año no reciben ninguna. Reasignando las mismas visitas dentro de la
-cartera de cada delegado (**≈ 9-10 / 5 / 2** visitas al año para A / B / C, ajustadas por volumen)
+cartera de cada delegado (una media de **≈ 9-10 / 5 / 2** visitas al año por médico A / B / C, ajustada al volumen de cada uno)
 se ganan **≈ 2,4 M€ de ventas al año (+8 %)** a coste cero.
 
 ## Contenido

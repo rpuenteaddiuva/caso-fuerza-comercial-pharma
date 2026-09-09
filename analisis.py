@@ -69,9 +69,12 @@ try:
 except NameError:  # ejecución como script
     display = print
 
-ROOT = Path.cwd()
+try:
+    ROOT = Path(__file__).resolve().parent  # como script: la carpeta donde está analisis.py, se lance desde donde se lance
+except NameError:
+    ROOT = Path.cwd()  # en el notebook no existe __file__: se usa la carpeta de trabajo
 DATA, OUT = ROOT / "2_datos", ROOT / "output"
-assert DATA.exists(), "Ejecuta desde la raíz del repositorio (donde está 2_datos/)"
+assert DATA.exists(), f"No encuentro la carpeta 2_datos/ en {ROOT}. Debe estar junto a analisis.py (o ser la carpeta de trabajo del notebook)."
 OUT.mkdir(exist_ok=True)
 
 PRECIO = 18.0  # €/unidad, constante en todo el periodo (enunciado)
